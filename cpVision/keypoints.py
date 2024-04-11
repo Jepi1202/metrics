@@ -30,3 +30,36 @@ def compute_oks(gts, preds, sigmas=None, area=1):
     
     return oks
 
+
+
+def compute_mAP(gts, preds, sigmas=None, area=1, oks_thresholds=np.linspace(0.5, 0.95, 10)):
+    """ 
+    Computes the mean Average Precision of detected keypoints
+
+    Args:
+    -----
+        - `gts`:
+        - `preds`:
+        - `sigmas`: 
+        - `area`:
+        - `oks_thresholds`:
+
+    Returns:
+    --------
+
+    """
+
+    oks_scores = []
+    for gt, pred in zip(gts, preds):
+        oks = compute_oks(gt, pred, sigmas=sigmas, area=area)
+        oks_scores.append(oks)
+    
+    APs = []
+    for threshold in oks_thresholds:
+        tp = sum(score >= threshold for score in oks_scores)
+        fp = len(oks_scores) - tp
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        APs.append(precision)
+    
+    mAP = np.mean(APs)
+    return mAP
